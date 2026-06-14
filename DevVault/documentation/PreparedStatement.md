@@ -10,9 +10,13 @@ Create a connection to the database:
 Connection myCon = DriverManager.getConnection(url, username, password);
 ```
 
+### Variable Name
+
+* `myCon` = **my Connection**
+
 ---
 
-## Step 2: Prepare the SQL Statement
+## Step 2: Build and Prepare the SQL Statement
 
 Instead of hardcoding values directly into the query:
 
@@ -35,11 +39,25 @@ PreparedStatement myStmt =
     );
 ```
 
----
+### Variable Name
 
-## Step 3: Set Parameter Values
+* `myStmt` = **my Statement**
 
-Each placeholder corresponds to an index starting at **1**:
+### Building the Query
+
+1. Write the SQL query using `?` placeholders.
+2. Create the `PreparedStatement` from the connection.
+3. Assign values to each placeholder using the appropriate method:
+
+    * `setString()`
+    * `setInt()`
+    * `setDouble()`
+    * `setBoolean()`
+    * etc.
+
+Each placeholder has an index starting from **1**.
+
+Example:
 
 ```java
 myStmt.setInt(1, 10);
@@ -48,7 +66,7 @@ myStmt.setString(2, "Chhavi");
 
 ---
 
-## Step 4: Execute the Query
+## Step 3: Execute the Statement
 
 ### For `SELECT` statements
 
@@ -62,11 +80,41 @@ ResultSet myRs = myStmt.executeQuery();
 int rowsAffected = myStmt.executeUpdate();
 ```
 
+example :
+```java
+// Build the query
+String query =
+    "UPDATE students " +
+    "SET age = ? " +
+    "WHERE name = ?";
+
+// Create the PreparedStatement
+PreparedStatement myStmt = myCon.prepareStatement(query);
+
+// Set the values for each placeholder
+myStmt.setInt(1, 26);
+myStmt.setString(2, "Bob");
+
+// Execute the query
+int rowsAffected = myStmt.executeUpdate();
+
+// Check the result
+if (rowsAffected > 0) {
+    System.out.println("Student updated successfully.");
+} else {
+    System.out.println("Student not found.");
+}
+```
+
 `rowsAffected` contains the number of rows modified by the query.
+
+### Variable Name
+
+* `myRs` = **my ResultSet**
 
 ---
 
-## Step 5: Process the Results (`SELECT` only)
+## Step 4: Process the Results (`SELECT` only)
 
 Retrieve the data stored in the `ResultSet`:
 
@@ -74,20 +122,27 @@ Retrieve the data stored in the `ResultSet`:
 while (myRs.next()) {
 
     int id = myRs.getInt("id");
-
     String name = myRs.getString("name");
-
     int age = myRs.getInt("age");
 
     // Process the retrieved data
+
 }
 ```
 
 `next()` moves the cursor to the next row and returns `false` when no more rows are available.
 
+To retrieve column values, use the method corresponding to the data type:
+
+* `getString()`
+* `getInt()`
+* `getDouble()`
+* `getBoolean()`
+* etc.
+
 ---
 
-## Step 6: Close Resources
+## Step 5: Close Resources
 
 Always close database resources when they are no longer needed:
 
@@ -99,14 +154,18 @@ myCon.close();
 
 Alternatively, a `try-with-resources` block can be used to close them automatically.
 
+---
+
 ## Summary
 
 | SQL Statement | Execution Method  |
-| ------------- | ----------------- |
+| :------------ | :---------------- |
 | `SELECT`      | `executeQuery()`  |
 | `INSERT`      | `executeUpdate()` |
 | `UPDATE`      | `executeUpdate()` |
 | `DELETE`      | `executeUpdate()` |
+
+---
 
 ## General Workflow
 
@@ -115,16 +174,29 @@ Connection
     ↓
 PreparedStatement
     ↓
-Set parameters
+Build query with ? placeholders
     ↓
-Execute query
+Set parameters with setXXX()
     ↓
-Process ResultSet (SELECT only)
+Execute statement
+    ↓
+Get ResultSet (SELECT only)
+    ↓
+Read rows with next()
+    ↓
+Retrieve values with getXXX()
     ↓
 Close resources
 ```
 
+## Variable Naming Convention
 
-### Source
+| Variable | Meaning       |
+| :------- | :------------ |
+| `myCon`  | my Connection |
+| `myStmt` | my Statement  |
+| `myRs`   | my ResultSet  |
 
-``https://www.geeksforgeeks.org/java/how-to-use-preparedstatement-in-java/``
+```
+Connection → PreparedStatement → setXXX() → executeQuery()/executeUpdate() → next() → getXXX() → close()
+```
